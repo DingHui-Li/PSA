@@ -4,7 +4,7 @@ import Chart from 'chart.js'
 import * as util from "./util"
 import { stringLiteral } from '@babel/types';
 import Barchart from "./barChart"
-import Input from "./input"
+import DataTable from "./dataTable"
 
 export const status={
   ready:'就绪',
@@ -13,17 +13,17 @@ export const status={
 };
 export class process{
     name="undefined";//进程名
-    arriveTime=0;//到达时间
-    startTime=0;//开始时间
-    serverTime=0;//服务时间
-    runTime=0;//已运行时间
-    finishTime=0;//完成时间
-    roundTime=0;//周转时间
+    status=status.ready;//状态 true：就绪 false：
+    arriveTime=-1;//到达时间
+    startTime=-1;//开始时间
+    serverTime=-1;//服务时间
+    runTime=-1;//已运行时间
+    finishTime=-1;//完成时间
+    roundTime=-1;//周转时间
     avgRoundTime=0.0;//带权周转时间
     priority=1;//优先级
-    status=status.true;//状态 true：就绪 false：
 }
-export default class Index extends React.Component{
+export default class Content extends React.Component{
   constructor(props){
     super(props);
     this.state={
@@ -31,23 +31,20 @@ export default class Index extends React.Component{
       isUpdate:false
     };
   }
-  getProcess=(processes)=>{
-    this.setState({
-      processes:processes,
-      isUpdate:false 
-    })
-  }
   updateProcess=(processes)=>{
-    this.setState({
+    this.setState(()=>({
       processes:processes,
       isUpdate:true
-    })
+    }))
   }
-  // shouldComponentUpdate(nextProps,nextState){
-  //   return !nextState.isUpdate;
-  // }
+  componentWillReceiveProps(newProps){
+    //console.log(newProps.choice)
+    this.setState(()=>({
+      processes:newProps.processes,
+      isUpdate:false
+    }))
+  }
   render(){
-    // console.log(JSON.stringify(this.state.processes))
     const labels=this.state.processes.map((p)=> p.name);
     const serverData=this.state.processes.map((p)=>p.serverTime);
     const arriveData=this.state.processes.map((p)=>p.arriveTime);
@@ -77,14 +74,19 @@ export default class Index extends React.Component{
       avgRoundData:avgRoundData,
       isLegend:'false'
     }
+    let algoChart=null;
+    if(this.props.choice===1){
+      algoChart= <controlAlgo.FCFS processes={this.props.processes} updateProcess={this.updateProcess} isUpdate={this.state.isUpdate}/>
+    }
+    else if(this.props.choice===2){
+      algoChart= <controlAlgo.RR processes={this.state.processes} updateProcess={this.updateProcess} isUpdate={this.state.isUpdate}/>
+    }
     return(
-      <div className={'col l12 s12'} >
-        <Input createProcess={this.getProcess} processes={this.state.processes}/>
-        <Barchart data={data2}/>
+      <div className={'col s12'} >
+        <DataTable processes={this.state.processes}/>
         <Barchart data={data}/>
-        {/* <controlAlgo.FCFS processes={this.state.processes} updateProcess={this.updateProcess} isUpdate={this.state.isUpdate}/> */}
-        <controlAlgo.RR processes={this.state.processes} updateProcess={this.updateProcess} isUpdate={this.state.isUpdate}/>
-        
+        {algoChart}
+         <Barchart data={data2}/>
       </div>
     );
   }

@@ -6,7 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#000000" />
     <link rel="stylesheet" href="./materialize/css/materialize.min.css">
+    <script src="./materialize/js/jquery-3.3.1.min.js"></script>
     <script src="./materialize/js/materialize.min.js"></script>
+    <link rel="stylesheet" href="./materialize/css/animate.css">
+
     <!--
       manifest.json provides metadata used when your web app is installed on a
       user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
@@ -29,18 +32,44 @@
         let height=chart.clientHeight|chart.offsetHeight;
         inputArea.style.height=height+"px";
       }
+      function scrollFunc(e) {  
+          e = e || window.event;
+          var nav=document.getElementById('nav');
+          var bt=document.getElementById('bottomBar');
+          if (e.wheelDelta) {              
+              if (e.wheelDelta > 0) { //当滑轮向上滚动时  
+                nav.classList.add("slideInDown")
+                nav.classList.remove("slideOutUp")
+                bt.classList.add("slideOutDown")
+                bt.classList.remove("slideDownUp")
+              }  
+              if (e.wheelDelta < 0) { //当滑轮向下滚动时  
+                nav.classList.add("slideOutUp")
+                nav.classList.remove("slideDownUp")
+                bt.classList.add("slideInDown")
+                bt.classList.remove("slideOutDown")
+             }  
+         } 
+      }  
+      window.onmousewheel = document.onmousewheel = scrollFunc;
       window.onload=function(){
         changeDivHeight();
+        var ele=document.getElementById('nav');
+        var height=ele.offsetHeight+10;
+        document.getElementById('content').style.paddingTop=height+"px";
+
+        $('.tabs').tabs();
       }
       window.onresize=function(){
 				 changeDivHeight();
-			}
+      }
     </script>
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
-    <div id="root" class="row">
-    </div>
+    
+    <div id="root"></div>
+   
     <!--
       This HTML file is a template.
       If you open it directly in the browser, you will see an empty page.

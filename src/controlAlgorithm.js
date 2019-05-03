@@ -19,7 +19,7 @@ export class FCFS extends React.Component{
 		}
 	}
 	componentWillReceiveProps(newProps){
-		if(!newProps.isUpdate){
+		if(!newProps.isUpdate&&newProps.processes){
 			const count=newProps.processes.length;
 			const processes=newProps.processes;
 			let labels=[];
@@ -92,11 +92,10 @@ export class RR extends React.Component{
 		}
 	}
 	componentWillReceiveProps(newProps){
-		if(!newProps.isUpdate){
+		if(!newProps.isUpdate&&newProps.processes.length!=0){
 			let processes=JSON.parse(JSON.stringify(newProps.processes));
 			let processQueue=JSON.parse(JSON.stringify(newProps.processes));
 			//let processQueue=newProps.processes;
-			let arriveData=[];
 			let serverData={
 				processName:null,
 				data:null,
@@ -109,7 +108,7 @@ export class RR extends React.Component{
 			let i=0;//队列顶部
 			var timeInterval=setInterval(()=>{	
 					processQueue[i].runTime+=timeSlice;
-					if(processQueue[i].startTime===0){
+					if(processQueue[i].startTime===-1){
 						processQueue[i].startTime=currentTime;
 						startData.time.push(processQueue[i].startTime);
 						startData.labels.push(processQueue[i].name);
@@ -137,7 +136,6 @@ export class RR extends React.Component{
 					else{//未完成---移动至队尾
 
 						let processIndex=getProcessIndex(processes,processQueue[i].name);
-						console.log(processIndex)
 						if(processIndex!==-1){
 							processes.splice(processIndex,1,processQueue[i]);
 
@@ -150,23 +148,24 @@ export class RR extends React.Component{
 						serverData.data=timeSlice;
 						serverData.status=processQueue[i].status;
 
-						let temp=JSON.parse(JSON.stringify(processQueue[i]));
+						let temp=processQueue[i];
 						processQueue.splice(i,1);
 						processQueue.push(temp);
 					}
 					if(processQueue.length==0){//退出循环
 						clearInterval(timeInterval);
 					}
-					newProps.updateProcess(processes);
+					newProps.updateProcess(JSON.parse(JSON.stringify(processes)));
 					this.setState({
 							startData:startData,
 							serverData:serverData,
 						})
-			},1000);
+			},500);
 			
 		}
 	}
 	shouldComponentUpdate(nextProps,nextStats){
+		//return true;
 		return !(this.state===nextStats);
 	}
 	 render(){

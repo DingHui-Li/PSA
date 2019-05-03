@@ -59,17 +59,9 @@ export default class GanttChart extends React.Component{
 						}
 						this.state.chart.data.datasets.push(newDataset);
 						this.state.chart.data.datasets.push(newDataset2);
-						
-						// if(newProps.data.serverData.status===status.done){
-						// 	let datasetsLength=this.state.chart.data.datasets.length;
-						// 	for(let i=0;i<datasetsLength;i++){
-
-						// 	}
-						// }	
 					}
 				}
-				this.state.chart.update();
-				
+				this.state.chart.update();			
 	  }
 	}
 	componentDidMount(){
