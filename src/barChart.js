@@ -10,18 +10,18 @@ export default class Barchart extends React.Component{
 	}
 	componentWillReceiveProps(newProps){//直接修改chart中的数据
 	  if(this.state.chart!=null){
-			this.state.chart.options.legend.display=false;
+				this.state.chart.options.legend.display=false;
 				if(newProps.data.isLegend=='false'){
 					this.state.chart.options.legend.display=false;
-					this.state.chart.data.datasets[1].backgroundColor='rgba(0,0,0,0)';
+					this.state.chart.data.datasets[0].backgroundColor='rgba(0,0,0,0)';
 				}
 				else{
 					this.state.chart.options.legend.display=true;
 				}
-			this.state.chart.data.datasets[0].data=newProps.data.arriveData;
-		  this.state.chart.data.labels=newProps.data.labels; 
-		  this.state.chart.data.datasets[2].data=newProps.data.serverData;
-			this.state.chart.data.datasets[1].data=newProps.data.startData;
+			this.state.chart.data.labels=newProps.data.labels; 
+			this.state.chart.data.datasets[0].data=newProps.data.startData;
+		  this.state.chart.data.datasets[1].data=newProps.data.serverData;
+			this.state.chart.data.datasets[2].data=newProps.data.runData;
 			this.state.chart.data.datasets[3].data=newProps.data.avgRoundData;
 			this.state.chart.data.datasets[4].data=newProps.data.roundData;
 		  this.state.chart.update();
@@ -46,11 +46,6 @@ export default class Barchart extends React.Component{
 		labels :this.props.data.labels,
 		datasets:[
 		  {
-			label:"arriveTime",
-			data : this.props.data.arriveData,
-			backgroundColor: 'rgba(255,110,64, 0.5)',
-		  },
-		  {
 			label:"startTime",
 			data :this.props.data.startData,
 			backgroundColor:'rgba(30,136,229, 0.5)'
@@ -59,7 +54,12 @@ export default class Barchart extends React.Component{
 			label:"serverTime",
 			data : this.props.data.serverData,
 			backgroundColor: 'rgba(0,200,83, 0.5)'
-			},  
+			},  	
+			{
+			label:"runTime",
+			data : this.props.data.runData,
+			backgroundColor: 'rgba(255,110,64, 0.5)',
+		  },
 			{
 				label:"avgRoundTime",
 				data:this.props.data.avgRoundData,

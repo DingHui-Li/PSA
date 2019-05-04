@@ -1,5 +1,8 @@
 import {process} from "./App"
 import React from "react"
+import Swiper from "swiper/dist/js/swiper"
+import "swiper/dist/css/swiper.min.css"
+import status from "./App"
 
 export function init(count){
 	var processes=new Array();
@@ -20,54 +23,17 @@ export function getProcessIndex(array,val){
 	}
 	return -1;
 }
+export function getIndexMinServertime(processes){
+	let min=0;
+	let count=processes.length;
+	for(let i=0;i<count;i++){
+		if(processes[i].serverTime<processes[min].serverTime){
+			min=i;
+		}
+	}
+	return min;
 
-export class BottomBar extends React.Component{
-	constructor(props){
-		super(props);
-		this.state={
-			disabled:false,
-			resetDisplay:"hidden"
-		}
-	}
-	createProcess=()=>{
-		var processes=init(10);
-		this.props.createProcess(processes);
-		this.setState({
-			//disabled:true,
-			resetDisplay:"visible"
-		});
-	}
-	reset=()=>{
-		window.location.reload()
-	}
-	render(){
-		const btnStyle={
-			'marginTop':'15px',
-			backgroundColor:"#4CAF50",
-			color:'white'
-		}
-		const restBtnStyle={
-			'marginTop':'15px',
-			marginLeft:'20px',
-			backgroundColor:"#D32F2F",
-			color:'white',
-			visibility:this.state.resetDisplay
-		}
-		return (
-			<div className='col s12 animated slideInUp'id='bottomBar' 
-				style={{
-					boxShadow:"0 -1px 1px 0 rgba(0,0,0,0.4)",
-					position:'fixed',
-					bottom:'0',
-					height:'65px',
-					backgroundColor:'#2196F3',
-					animationDuration:'0.5s',
-					}}>
-				<div className={'col s6'}>
-					<div className={'btn'} style={btnStyle} onClick={this.createProcess} disabled={this.state.disabled}>初始化数据</div>
-					<div className={'btn'} style={restBtnStyle} onClick={this.reset} >重置</div>
-				</div>
-			</div>
-		)
-	}
+}
+export function calcPriority(processes){
+	
 }

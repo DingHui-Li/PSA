@@ -2,11 +2,7 @@ import React from "react"
 import Barchart from "./barChart"
 import {status} from "./App"
 import GanttChart from "./GanttChart"
-import {getProcessIndex} from "./util"
-
-var isCpuBusy=false;
-var currentTime=1;
-var timeSlice=1;
+import {getProcessIndex,getIndexMinServertime} from "./util"
 
 export class FCFS extends React.Component{
 	constructor(props){
@@ -19,7 +15,7 @@ export class FCFS extends React.Component{
 		}
 	}
 	componentWillReceiveProps(newProps){
-		if(!newProps.isUpdate&&newProps.processes){
+		if(!newProps.isUpdate&&newProps.processes.length!==0){
 			const count=newProps.processes.length;
 			const processes=newProps.processes;
 			let labels=[];
@@ -29,20 +25,18 @@ export class FCFS extends React.Component{
 			for(let i=0;i<count;i++){
 				setTimeout(()=>{
 					if(i==0){
-					processes[i].finishTime=processes[i].arriveTime+processes[i].serverTime;
-					processes[i].startTime=processes[i].arriveTime;
-					processes[i].runTime=processes[i].serverTime;
+						processes[i].startTime=processes[i].arriveTime;
+						processes[i].finishTime=processes[i].arriveTime+processes[i].serverTime;
 					}else{
 						if(processes[i].arriveTime>processes[i-1].finishTime){
 							processes[i].startTime=processes[i].arriveTime;
 							processes[i].finishTime=processes[i].arriveTime+processes[i].serverTime;
-							processes[i].runTime=processes[i].serverTime;
 						}else{
 							processes[i].startTime=processes[i-1].finishTime;
-							processes[i].finishTime=processes[i].startTime+processes[i].serverTime;
-							processes[i].runTime=processes[i].serverTime;
+							processes[i].finishTime=processes[i].startTime+processes[i].serverTime;	
 						}
 					}
+					processes[i].runTime=processes[i].serverTime;
 					processes[i].roundTime=processes[i].finishTime-processes[i].arriveTime;
 					processes[i].avgRoundTime=parseFloat(processes[i].roundTime/processes[i].serverTime).toFixed(2);
 					processes[i].status=status.done;
@@ -70,8 +64,10 @@ export class FCFS extends React.Component{
 			chartName:'FCFS调度状态',
 			labels:this.state.labels,
 			serverData:this.state.serverData ,
-			arriveData:null,
 			startData:this.state.startData,
+			roundData:[],
+			avgRoundData:[],
+			roundData:[],
 			isLegend:'false'
 		}
 		return(
@@ -82,8 +78,6 @@ export class FCFS extends React.Component{
 export class RR extends React.Component{
 	constructor(props){
 		super(props);
-		isCpuBusy=false;
-		currentTime=0;
 		this.state={
 			labels:[],
 			serverData:[],
@@ -93,6 +87,8 @@ export class RR extends React.Component{
 	}
 	componentWillReceiveProps(newProps){
 		if(!newProps.isUpdate&&newProps.processes.length!=0){
+			let currentTime=1;
+			let timeSlice=1;
 			let processes=JSON.parse(JSON.stringify(newProps.processes));
 			let processQueue=JSON.parse(JSON.stringify(newProps.processes));
 			//let processQueue=newProps.processes;
@@ -117,7 +113,7 @@ export class RR extends React.Component{
 					if(processQueue[i].runTime>=processQueue[i].serverTime){//服务时间完成---从队列中移除
 						processQueue[i].finishTime=currentTime;
 						processQueue[i].runTime=processQueue[i].serverTime;
-						processQueue[i].roundTime=processQueue[i].finishTime-processQueue[i].startTime;
+						processQueue[i].roundTime=processQueue[i].finishTime-processQueue[i].arriveTime;
 						processQueue[i].avgRoundTime=parseFloat(processQueue[i].roundTime/processQueue[i].serverTime).toFixed(2);
 						processQueue[i].status=status.done;
 
@@ -175,10 +171,7 @@ export class RR extends React.Component{
 			chartName:'RR调度状态',
 			labels:this.state.labels,
 			serverData:this.state.serverData,
-			arriveData:null,
 			startData:this.state.startData,
-			roundData:null,
-			avgRoundData:null,
 			isLegend:'false'
 		  }
 		// console.log(this.state.serverData.processName+":"+this.state.serverData.status)
@@ -186,4 +179,87 @@ export class RR extends React.Component{
 				<GanttChart data={data}/>
 		 );
 	 }
+}
+export class SPF extends React.Component{
+	constructor(props){
+		super(props);
+		this.state={
+			labels:[],
+			startData:[],
+			serverData:[],
+		}
+	}
+	componentWillReceiveProps(newProps){
+		if(!newProps.isUpdate&&newProps.processes.length!==0){
+			let i=0;//完成顺序
+			let labels=[];
+			let startData=[];
+			let serverData=[];
+			let processes=JSON.parse(JSON.stringify(newProps.processes));
+			let processesQueue=JSON.parse(JSON.stringify(newProps.processes));
+			let interval=setInterval(()=>{
+				let index=getIndexMinServertime(processesQueue);
+				if(i==0){
+					processesQueue[index].startTime=processesQueue[index].arriveTime;
+				}
+				else{
+					if(processesQueue[index].arriveTime>processes[i-1].finishTime){
+						processesQueue[index].startTime=processesQueue[index].arriveTime;
+					}else{
+						processesQueue[index].startTime=processes[i-1].finishTime;
+					}
+					
+				}
+				processesQueue[index].finishTime=processesQueue[index].startTime+processesQueue[index].serverTime;
+				processesQueue[index].runTime=processesQueue[index].serverTime;
+				processesQueue[index].roundTime=processesQueue[index].finishTime-processesQueue[index].arriveTime;
+				processesQueue[index].avgRoundTime=parseFloat(processesQueue[index].roundTime/processesQueue[index].serverTime).toFixed(2);
+				processesQueue[index].status=status.done;
+
+				let processIndex=getProcessIndex(processes,processesQueue[index].name);
+				if(processIndex!==-1){
+					if(processes[i].name==processesQueue[index].name){
+						processes.splice(i,1,processesQueue[index]);	
+					}
+					else{
+						let temp=JSON.parse(JSON.stringify(processes[i]));
+						processes.splice(i,1,processesQueue[index]);
+						processes.splice(processIndex,1);
+						processes.push(temp);
+					}
+					labels.push(processesQueue[index].name);
+					startData.push(processesQueue[index].startTime);
+					serverData.push(processesQueue[index].serverTime);
+					this.setState({
+						labels:labels,
+						startData:startData,
+						serverData:serverData,
+					})
+					processesQueue.splice(index,1);
+					
+					newProps.updateProcess(processes);
+					i++;
+				}
+				if(processesQueue.length==0){
+					clearInterval(interval);
+				}
+			},1000);
+		}
+	}
+	render(){
+		const data={
+			type:'horizontalBar',
+			chartID:"SPFchart",
+			chartName:'SPF调度状态',
+			labels:this.state.labels,
+			serverData:this.state.serverData,
+			startData:this.state.startData,
+			runData:this.state.runData,
+			avgRoundData:[],
+			isLegend:'false'
+		}
+		return(
+			 <Barchart data={data}/>
+		);
+	}
 }

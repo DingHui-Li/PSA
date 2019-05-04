@@ -26,6 +26,9 @@
     -->
     <title>React App</title>
     <script>
+      if(sessionStorage.getItem('choice')===null){
+         sessionStorage.setItem('choice','1')
+      }
       function changeDivHeight(){
         let inputArea=document.getElementById('inputArea');
         let chart=document.getElementById('initChart');
@@ -51,14 +54,15 @@
              }  
          } 
       }  
-      window.onmousewheel = document.onmousewheel = scrollFunc;
-      window.onload=function(){
+        window.onmousewheel = document.onmousewheel = scrollFunc;
+        window.onload=function(){
         changeDivHeight();
         var ele=document.getElementById('nav');
         var height=ele.offsetHeight+10;
         document.getElementById('content').style.paddingTop=height+"px";
 
         $('.tabs').tabs();
+       
       }
       window.onresize=function(){
 				 changeDivHeight();
