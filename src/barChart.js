@@ -82,6 +82,9 @@ export default class Barchart extends React.Component{
 		chart:myBarChart
 	  })
 	}
+	shouldComponentUpdate(newProps){
+		return !newProps.isDone;
+	}
 	render(){
 	  const style={
 			padding:'10px',

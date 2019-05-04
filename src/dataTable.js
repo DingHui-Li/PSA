@@ -61,12 +61,12 @@ export default class DataTable extends React.Component{
 			 padding:'0'
 		}
 		const style={
-			padding:'0',
-			height:'100%'
+			padding:'10px',
+			marginTop:'10px'
 		}
 		return(
-			<div className={'col l6 s12'} id="inputArea">
-				<div style={style} className={'z-depth-1'}>
+			<div className={'col l6 s12'} >
+				<div style={style} className={'z-depth-1'}id="inputArea">
 					<div className={'col s12'} style={tableAreaStyle}>
 						<table style={tableStyle} className={'table table-stripedv centered'}>
 							<thead>

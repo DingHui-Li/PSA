@@ -33,7 +33,7 @@
         let inputArea=document.getElementById('inputArea');
         let chart=document.getElementById('initChart');
         let height=chart.clientHeight|chart.offsetHeight;
-        inputArea.style.height=height+"px";
+        inputArea.style.height=height-6+"px";
       }
       function scrollFunc(e) {  
           e = e || window.event;
@@ -73,7 +73,6 @@
     <noscript>You need to enable JavaScript to run this app.</noscript>
     
     <div id="root"></div>
-   
     <!--
       This HTML file is a template.
       If you open it directly in the browser, you will see an empty page.

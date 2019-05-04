@@ -2,7 +2,7 @@ import React from "react"
 import Barchart from "./barChart"
 import {status} from "./App"
 import GanttChart from "./GanttChart"
-import {getProcessIndex,getIndexMinServertime} from "./util"
+import * as util from "./util"
 
 export class FCFS extends React.Component{
 	constructor(props){
@@ -15,7 +15,7 @@ export class FCFS extends React.Component{
 		}
 	}
 	componentWillReceiveProps(newProps){
-		if(!newProps.isUpdate&&newProps.processes.length!==0){
+		if(!newProps.isUpdate&&newProps.processes.length>0){
 			const count=newProps.processes.length;
 			const processes=newProps.processes;
 			let labels=[];
@@ -41,7 +41,10 @@ export class FCFS extends React.Component{
 					processes[i].avgRoundTime=parseFloat(processes[i].roundTime/processes[i].serverTime).toFixed(2);
 					processes[i].status=status.done;
 
-					newProps.updateProcess(processes);//状态提升
+					if(i==count-1){
+						newProps.updateProcess(processes,true);
+					}
+					else newProps.updateProcess(processes,false);
 
 					labels.push(processes[i].name);
 					serverData.push(processes[i].serverTime);
@@ -86,7 +89,7 @@ export class RR extends React.Component{
 		}
 	}
 	componentWillReceiveProps(newProps){
-		if(!newProps.isUpdate&&newProps.processes.length!=0){
+		if(!newProps.isUpdate&&newProps.processes.length>0){
 			let currentTime=1;
 			let timeSlice=1;
 			let processes=JSON.parse(JSON.stringify(newProps.processes));
@@ -117,7 +120,7 @@ export class RR extends React.Component{
 						processQueue[i].avgRoundTime=parseFloat(processQueue[i].roundTime/processQueue[i].serverTime).toFixed(2);
 						processQueue[i].status=status.done;
 
-						let processIndex=getProcessIndex(processes,processQueue[i].name);
+						let processIndex=util.getProcessIndex(processes,processQueue[i].name);
 						if(processIndex!==-1){
 							processes.splice(processIndex,1,processQueue[i]);
 						}
@@ -131,7 +134,7 @@ export class RR extends React.Component{
 					}
 					else{//未完成---移动至队尾
 
-						let processIndex=getProcessIndex(processes,processQueue[i].name);
+						let processIndex=util.getProcessIndex(processes,processQueue[i].name);
 						if(processIndex!==-1){
 							processes.splice(processIndex,1,processQueue[i]);
 
@@ -149,9 +152,11 @@ export class RR extends React.Component{
 						processQueue.push(temp);
 					}
 					if(processQueue.length==0){//退出循环
+						newProps.updateProcess(JSON.parse(JSON.stringify(processes)),true);
 						clearInterval(timeInterval);
 					}
-					newProps.updateProcess(JSON.parse(JSON.stringify(processes)));
+					else newProps.updateProcess(JSON.parse(JSON.stringify(processes)),false);
+					
 					this.setState({
 							startData:startData,
 							serverData:serverData,
@@ -162,7 +167,7 @@ export class RR extends React.Component{
 	}
 	shouldComponentUpdate(nextProps,nextStats){
 		//return true;
-		return !(this.state===nextStats);
+		return !(this.state==nextStats);
 	}
 	 render(){
 			let data={
@@ -190,7 +195,7 @@ export class SPF extends React.Component{
 		}
 	}
 	componentWillReceiveProps(newProps){
-		if(!newProps.isUpdate&&newProps.processes.length!==0){
+		if(!newProps.isUpdate&&newProps.processes.length>0){
 			let i=0;//完成顺序
 			let labels=[];
 			let startData=[];
@@ -198,7 +203,7 @@ export class SPF extends React.Component{
 			let processes=JSON.parse(JSON.stringify(newProps.processes));
 			let processesQueue=JSON.parse(JSON.stringify(newProps.processes));
 			let interval=setInterval(()=>{
-				let index=getIndexMinServertime(processesQueue);
+				let index=util.getIndexMinServertime(processesQueue);
 				if(i==0){
 					processesQueue[index].startTime=processesQueue[index].arriveTime;
 				}
@@ -216,7 +221,7 @@ export class SPF extends React.Component{
 				processesQueue[index].avgRoundTime=parseFloat(processesQueue[index].roundTime/processesQueue[index].serverTime).toFixed(2);
 				processesQueue[index].status=status.done;
 
-				let processIndex=getProcessIndex(processes,processesQueue[index].name);
+				let processIndex=util.getProcessIndex(processes,processesQueue[index].name);
 				if(processIndex!==-1){
 					if(processes[i].name==processesQueue[index].name){
 						processes.splice(i,1,processesQueue[index]);	
@@ -236,12 +241,13 @@ export class SPF extends React.Component{
 						serverData:serverData,
 					})
 					processesQueue.splice(index,1);
-					
-					newProps.updateProcess(processes);
 					i++;
 				}
 				if(processesQueue.length==0){
+					newProps.updateProcess(processes,true);
 					clearInterval(interval);
+				}else {
+					newProps.updateProcess(processes,false);
 				}
 			},1000);
 		}
@@ -261,5 +267,92 @@ export class SPF extends React.Component{
 		return(
 			 <Barchart data={data}/>
 		);
+	}
+}
+export class HRRN extends React.Component{
+	constructor(props){
+		super(props);
+		this.state={
+			labels:[],
+			startData:[],
+			serverData:[],
+		}
+	}
+	componentWillReceiveProps(newProps){
+		if(!newProps.isUpdate&&newProps.processes.length>0){
+			let processQueue=JSON.parse(JSON.stringify(newProps.processes));
+			let processes=JSON.parse(JSON.stringify(newProps.processes));
+			let i=0;
+			let currentTime=0;
+			let labels=[];
+			let startData=[];
+			let serverData=[];
+			let interval=setInterval(()=>{
+				util.calcPriority(processQueue,currentTime);
+				let index=util.getIndexMaxPriority(processQueue);
+				if(i==0){
+					processQueue[index].startTime=processQueue[index].arriveTime;
+				}else{
+					if(processQueue[index].arriveTime>processes[i-1].finishTime){
+						processQueue[index].startTime=processQueue[index].arriveTime;
+					}
+					else{
+						processQueue[index].startTime=processes[i-1].finishTime;
+					}
+				}
+				
+				processQueue[index].finishTime=processQueue[index].startTime+processQueue[index].serverTime;
+				currentTime=processQueue[index].finishTime;
+
+				processQueue[index].runTime=processQueue[index].serverTime;
+				processQueue[index].roundTime=processQueue[index].finishTime-processQueue[index].arriveTime;
+				processQueue[index].avgRoundTime=parseFloat(processQueue[index].roundTime/processQueue[index].serverTime).toFixed(2);
+				processQueue[index].status=status.done;
+				
+				let processIndex=util.getProcessIndex(processes,processQueue[index].name);
+				if(processIndex!==-1){
+					if(processes[i].name==processQueue[index].name){
+						processes.splice(i,1,processQueue[index]);	
+					}
+					else{
+						let temp=JSON.parse(JSON.stringify(processes[i]));
+						processes.splice(i,1,processQueue[index]);
+						processes.splice(processIndex,1);
+						processes.push(temp);
+					}
+					labels.push(processQueue[index].name);
+					startData.push(processQueue[index].startTime);
+					serverData.push(processQueue[index].serverTime);
+					this.setState({
+						labels:labels,
+						startData:startData,
+						serverData:serverData,
+					})
+					processQueue.splice(index,1);
+					i++;
+				}
+				if(processQueue.length==0){
+					newProps.updateProcess(processes,true);
+					clearInterval(interval);
+				}else newProps.updateProcess(processes,false);
+				
+			},1000)
+		}
+	}
+	render(){
+		const data={
+			type:'horizontalBar',
+			chartID:"HRRNchart",
+			chartName:'HRRN调度状态',
+			labels:this.state.labels,
+			serverData:this.state.serverData,
+			startData:this.state.startData,
+			runData:this.state.runData,
+			avgRoundData:[],
+			isLegend:'false'
+		}
+		return(
+			<Barchart data={data}/>
+		)
 	}
 }

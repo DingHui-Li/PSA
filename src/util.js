@@ -1,8 +1,4 @@
 import {process} from "./App"
-import React from "react"
-import Swiper from "swiper/dist/js/swiper"
-import "swiper/dist/css/swiper.min.css"
-import status from "./App"
 
 export function init(count){
 	var processes=new Array();
@@ -34,6 +30,19 @@ export function getIndexMinServertime(processes){
 	return min;
 
 }
-export function calcPriority(processes){
-	
+export function calcPriority(processes,currentTime){
+	let length=processes.length;
+	for(let i=0;i<length;i++){
+		processes[i].priority=parseFloat((currentTime-processes[i].arriveTime+processes[i].serverTime)/processes[i].serverTime).toFixed(2);
+	}
+}
+export function getIndexMaxPriority(processes){
+	let max=0;
+	let length=processes.length;
+	for(let i=0;i<length;i++){
+		if(processes[i].priority>processes[max].priority){
+			max=i;
+		}
+	}
+	return max;
 }
