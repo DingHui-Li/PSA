@@ -1,6 +1,6 @@
 import React from "react"
-import * as util from "./util"
 import {status} from "./App"
+import Card from '@material-ui/core/Card';
 
 export default class DataTable extends React.Component{
 	constructor(props){
@@ -44,9 +44,7 @@ export default class DataTable extends React.Component{
 							<td key={index}>{process[key]}</td>	
 						)}
 					</tr>
-				
-			}
-				
+			}	
 			)
 		}
 		const tableStyle={
@@ -66,7 +64,7 @@ export default class DataTable extends React.Component{
 		}
 		return(
 			<div className={'col l6 s12'} >
-				<div style={style} className={'z-depth-1'}id="inputArea">
+				<Card style={style} id="inputArea">
 					<div className={'col s12'} style={tableAreaStyle}>
 						<table style={tableStyle} className={'table table-stripedv centered'}>
 							<thead>
@@ -79,7 +77,7 @@ export default class DataTable extends React.Component{
 							</tbody>
 						</table>
 					</div>
-				</div>
+				</Card>
 			</div>
 		);
 	}

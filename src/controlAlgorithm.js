@@ -3,6 +3,7 @@ import Barchart from "./barChart"
 import {status} from "./App"
 import GanttChart from "./GanttChart"
 import * as util from "./util"
+import { nullLiteral } from "@babel/types";
 
 export class FCFS extends React.Component{
 	constructor(props){
@@ -11,19 +12,20 @@ export class FCFS extends React.Component{
 			labels:[],
 			serverData:[],
 			startData:[],
-			arriveData: []
+			arriveData: [],
+			interval:null
 		}
 	}
 	componentWillReceiveProps(newProps){
-		if(!newProps.isUpdate&&newProps.processes.length>0){
+		if(!newProps.isUpdate&&newProps.processes.length>0&&newProps.isStart){
 			const count=newProps.processes.length;
-			const processes=newProps.processes;
+			const processes=JSON.parse(JSON.stringify(newProps.processes));
 			let labels=[];
 			let arriveData=[];
 			let serverData=[];
 			let startData=[];
-			for(let i=0;i<count;i++){
-				setTimeout(()=>{
+			let i=0;
+			let interval=setInterval(()=>{
 					if(i==0){
 						processes[i].startTime=processes[i].arriveTime;
 						processes[i].finishTime=processes[i].arriveTime+processes[i].serverTime;
@@ -50,15 +52,22 @@ export class FCFS extends React.Component{
 					serverData.push(processes[i].serverTime);
 					startData.push(processes[i].startTime);
 					arriveData.push(processes[i].arriveTime);
+					i++;
+					if(i==count){
+						clearInterval(interval);
+					}
 					this.setState({
 						labels:labels,
 						serverData:serverData,
 						startData:startData,
 						arriveData:arriveData,
+						interval:interval
 					})
-				},i*1000)
-			}
+				},1000)
 		}
+	}
+	componentWillUnmount(){
+		clearInterval(this.state.interval);
 	}
 	render(){
 		const data={
@@ -86,10 +95,15 @@ export class RR extends React.Component{
 			serverData:[],
 			startData:[],
 			arriveData: [],	
+			isRestart:true,
+			interval:null
 		}
 	}
 	componentWillReceiveProps(newProps){
-		if(!newProps.isUpdate&&newProps.processes.length>0){
+		if(!newProps.isUpdate&&newProps.processes.length>0&&newProps.isStart){
+			this.setState({
+				isRestart:true
+			})
 			let currentTime=1;
 			let timeSlice=1;
 			let processes=JSON.parse(JSON.stringify(newProps.processes));
@@ -105,7 +119,7 @@ export class RR extends React.Component{
 				time:[],
 			};
 			let i=0;//队列顶部
-			var timeInterval=setInterval(()=>{	
+			var interval=setInterval(()=>{	
 					processQueue[i].runTime+=timeSlice;
 					if(processQueue[i].startTime===-1){
 						processQueue[i].startTime=currentTime;
@@ -153,13 +167,15 @@ export class RR extends React.Component{
 					}
 					if(processQueue.length==0){//退出循环
 						newProps.updateProcess(JSON.parse(JSON.stringify(processes)),true);
-						clearInterval(timeInterval);
+						clearInterval(interval);
 					}
 					else newProps.updateProcess(JSON.parse(JSON.stringify(processes)),false);
 					
 					this.setState({
 							startData:startData,
 							serverData:serverData,
+							isRestart:false,
+							interval:interval
 						})
 			},500);
 			
@@ -168,6 +184,9 @@ export class RR extends React.Component{
 	shouldComponentUpdate(nextProps,nextStats){
 		//return true;
 		return !(this.state==nextStats);
+	}
+	componentWillUnmount(){
+		clearInterval(this.state.interval)
 	}
 	 render(){
 			let data={
@@ -181,7 +200,7 @@ export class RR extends React.Component{
 		  }
 		// console.log(this.state.serverData.processName+":"+this.state.serverData.status)
 		 return(
-				<GanttChart data={data}/>
+				<GanttChart data={data} isStart={this.state.isRestart}/>
 		 );
 	 }
 }
@@ -192,10 +211,11 @@ export class SPF extends React.Component{
 			labels:[],
 			startData:[],
 			serverData:[],
+			interval:null
 		}
 	}
 	componentWillReceiveProps(newProps){
-		if(!newProps.isUpdate&&newProps.processes.length>0){
+		if(!newProps.isUpdate&&newProps.processes.length>0&&newProps.isStart){
 			let i=0;//完成顺序
 			let labels=[];
 			let startData=[];
@@ -239,6 +259,7 @@ export class SPF extends React.Component{
 						labels:labels,
 						startData:startData,
 						serverData:serverData,
+						interval:interval
 					})
 					processesQueue.splice(index,1);
 					i++;
@@ -251,6 +272,9 @@ export class SPF extends React.Component{
 				}
 			},1000);
 		}
+	}
+	componentWillUnmount(){
+		clearInterval(this.state.interval)
 	}
 	render(){
 		const data={
@@ -276,10 +300,11 @@ export class HRRN extends React.Component{
 			labels:[],
 			startData:[],
 			serverData:[],
+			interval:null
 		}
 	}
 	componentWillReceiveProps(newProps){
-		if(!newProps.isUpdate&&newProps.processes.length>0){
+		if(!newProps.isUpdate&&newProps.processes.length>0&&newProps.isStart){
 			let processQueue=JSON.parse(JSON.stringify(newProps.processes));
 			let processes=JSON.parse(JSON.stringify(newProps.processes));
 			let i=0;
@@ -327,6 +352,7 @@ export class HRRN extends React.Component{
 						labels:labels,
 						startData:startData,
 						serverData:serverData,
+						interval:interval
 					})
 					processQueue.splice(index,1);
 					i++;
@@ -338,6 +364,9 @@ export class HRRN extends React.Component{
 				
 			},1000)
 		}
+	}
+	componentWillUnmount(){
+		clearInterval(this.state.interval);
 	}
 	render(){
 		const data={

@@ -24,7 +24,7 @@
       work correctly both with client-side routing and a non-root public URL.
       Learn how to configure a non-root public URL by running `npm run build`.
     -->
-    <title>React App</title>
+    <title>进程调度算法</title>
     <script>
       if(sessionStorage.getItem('choice')===null){
          sessionStorage.setItem('choice','1')
@@ -33,7 +33,7 @@
         let inputArea=document.getElementById('inputArea');
         let chart=document.getElementById('initChart');
         let height=chart.clientHeight|chart.offsetHeight;
-        inputArea.style.height=height-6+"px";
+        inputArea.style.height=height+"px";
       }
       function scrollFunc(e) {  
           e = e || window.event;
@@ -56,7 +56,6 @@
       }  
         window.onmousewheel = document.onmousewheel = scrollFunc;
         window.onload=function(){
-        changeDivHeight();
         var ele=document.getElementById('nav');
         var height=ele.offsetHeight+10;
         document.getElementById('content').style.paddingTop=height+"px";
@@ -73,6 +72,14 @@
     <noscript>You need to enable JavaScript to run this app.</noscript>
     
     <div id="root"></div>
+  <footer class="page-footer row"style='margin-bottom:70px;background-color:#fff'>
+          <div class='center col s12'style='color:#757575'>
+           © 2019-5-5 李定辉
+          </div>
+          <div class="col s12 center"style='color:black;'>
+              <a href='https://github.com/DingHui-Li/PSA'class='valign-wrapper' style='width:fit-content;margin:0 auto;color:#4CAF50;font-weight: bold'><img src='./github.png'style='height:20px'/>https://github.com/DingHui-Li/PSA</a>
+          </div>
+    </footer>
     <!--
       This HTML file is a template.
       If you open it directly in the browser, you will see an empty page.

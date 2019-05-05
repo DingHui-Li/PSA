@@ -1,5 +1,6 @@
 import React from "react"
 import Chart from "chart.js"
+import Card from '@material-ui/core/Card';
 
 export default class Barchart extends React.Component{
 	constructor(props){
@@ -80,7 +81,11 @@ export default class Barchart extends React.Component{
 	  });
 	  this.setState({
 		chart:myBarChart
-	  })
+		})
+		let inputArea=document.getElementById('inputArea');
+        let chart=document.getElementById('initChart');
+        let height=chart.clientHeight|chart.offsetHeight;
+        inputArea.style.height=height+"px";
 	}
 	shouldComponentUpdate(newProps){
 		return !newProps.isDone;
@@ -92,7 +97,9 @@ export default class Barchart extends React.Component{
 	  }
 	  return(
 		<div className={'col l6 s12'} >
-		  <canvas className={'z-depth-1'}style={style}height='200' id={this.props.data.chartID}></canvas>
+			<Card style={style}>
+		  	<canvas height='200' id={this.props.data.chartID}></canvas>
+			</Card>
 		</div>
 	  );
 	}

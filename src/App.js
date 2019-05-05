@@ -25,11 +25,12 @@ export default class Content extends React.Component{
     super(props);
     this.state={
       processes:[],
-      isUpdate:false,
+      isUpdate:false
     };
   }
   updateProcess=(processes,isDone)=>{
     if(isDone){
+      this.props.done();
       let avgRound=0;
       let weRound=0.0;
       const length=processes.length; 
@@ -39,7 +40,21 @@ export default class Content extends React.Component{
       }
       avgRound=parseFloat(avgRound/length).toFixed(2);
       weRound=parseFloat(weRound/length).toFixed(2);
-
+      
+      let choice=sessionStorage.getItem("choice");
+      let algoName="";
+      if(choice=='1') algoName="先来先服务(FCFS)";
+      else if(choice=='2') algoName="时间片轮转(RR)"
+      else if(choice=='3') algoName="最短进程优先(SPF)"
+      else if(choice=='4') algoName="高响应比优先(HRRN)"
+      var myDate = new Date();
+      const data={
+        algoName:algoName,
+        avgRound:avgRound,
+        weRound:weRound,
+        time:myDate.toLocaleTimeString()
+      }
+      this.props.addCompareData(data);
       document.getElementById("avgRound").innerHTML=avgRound;
       document.getElementById("weRound").innerHTML=weRound;
 
@@ -54,7 +69,6 @@ export default class Content extends React.Component{
     this.setState(()=>({
       processes:newProps.processes,
       isUpdate:false,
-
     }))
   }
   // shouldComponentUpdate(newProps){
@@ -92,19 +106,19 @@ export default class Content extends React.Component{
     }
     let algoChart=null;
     if(this.props.choice==='1'){
-      algoChart= <controlAlgo.FCFS processes={this.state.processes} updateProcess={this.updateProcess} isUpdate={this.state.isUpdate} />
+      algoChart= <controlAlgo.FCFS processes={this.state.processes} updateProcess={this.updateProcess} isUpdate={this.state.isUpdate} isStart={this.props.isStart}/>
     }
     else if(this.props.choice==='2'){
-      algoChart= <controlAlgo.RR processes={this.state.processes} updateProcess={this.updateProcess} isUpdate={this.state.isUpdate} />
+      algoChart= <controlAlgo.RR processes={this.state.processes} updateProcess={this.updateProcess} isUpdate={this.state.isUpdate} isStart={this.props.isStart}/>
     }
     else if(this.props.choice==='3'){
-      algoChart=  <controlAlgo.SPF processes={this.state.processes} updateProcess={this.updateProcess} isUpdate={this.state.isUpdate} />
+      algoChart=  <controlAlgo.SPF processes={this.state.processes} updateProcess={this.updateProcess} isUpdate={this.state.isUpdate} isStart={this.props.isStart}/>
     }
     else if(this.props.choice==='4'){
-      algoChart=  <controlAlgo.HRRN processes={this.state.processes} updateProcess={this.updateProcess} isUpdate={this.state.isUpdate}/>
+      algoChart=  <controlAlgo.HRRN processes={this.state.processes} updateProcess={this.updateProcess} isUpdate={this.state.isUpdate} isStart={this.props.isStart}/>
     }
     return(
-      <div className={'col s12'} >
+      <div className={'col s12'}>
         <DataTable processes={this.state.processes} />
         <Barchart data={data} />
         {algoChart} 

@@ -4,6 +4,15 @@ import Content from './App';
 import * as serviceWorker from './serviceWorker';
 import * as util from "./util"
 import M from "materialize-css"
+import CompareChart from './comparChart';
+import Button from "@material-ui/core/Button"
+import Card from "@material-ui/core/Card"
+import Table from '@material-ui/core/Table';
+import TableBody from '@material-ui/core/TableBody';
+import TableCell from '@material-ui/core/TableCell';
+import TableHead from '@material-ui/core/TableHead';
+import TableRow from '@material-ui/core/TableRow';
+
 
 class Nav extends React.Component{
 	choice(index){
@@ -16,6 +25,17 @@ class Nav extends React.Component{
 		else if(choice=='2') algoName="时间片轮转(RR)"
 		else if(choice=='3') algoName="最短进程优先(SPF)"
 		else if(choice=='4') algoName="高响应比优先(HRRN)"
+		else if(choice=='5') algoName="算法比较"
+		// let disabled=false;
+		// if(this.props.isStart){
+		// 	if(this.props.isDone){
+		// 		disabled=false;
+		// 	}
+		// 	else{
+		// 		disabled=true;
+		// 	}
+		// }
+		// console.log(disabled)
 		return(
 			<nav id='nav'className="nav-extended animated slideInDown"style={{backgroundColor:'#2196F3','animationDuration':'0.8s',position: 'fixed'}}>
 				<div className="nav-wrapper">
@@ -26,10 +46,21 @@ class Nav extends React.Component{
 				</div>
 				<div className="nav-content">
 					<ul className="tabs tabs-transparent">
-						<li className="tab" onClick={this.choice.bind(this,1)}><a className={choice==='1'?'active':''}  href="javascript:void(0)" style={{fontWeight:'bold'}}>FCFS</a></li>
-						<li className="tab" onClick={this.choice.bind(this,2)}><a className={choice==='2'?'active':''} href="javascript:void(0)" style={{fontWeight:'bold'}}>RR</a></li>
-						<li className="tab" onClick={this.choice.bind(this,3)}><a className={choice==='3'?'active':''} href="javascript:void(0)" style={{fontWeight:'bold'}}>SPF</a></li>
-						<li className="tab" onClick={this.choice.bind(this,4)}><a className={choice==='4'?'active':''} href="javascript:void(0)" style={{fontWeight:'bold'}}>HRRN</a></li>
+						<li className="tab" onClick={this.choice.bind(this,1)}>
+							<a className={`${choice=='1'?'active':''}`}  href="javascript:void(0)" style={{fontWeight:'bold'}}>FCFS</a>
+						</li>
+						<li className="tab" onClick={this.choice.bind(this,2)}>
+							<a className={`${choice=='2'?'active':''}`} href="javascript:void(0)" style={{fontWeight:'bold'}}>RR</a>
+						</li>
+						<li className="tab" onClick={this.choice.bind(this,3)}>
+							<a className={`${choice=='3'?'active':''}`} href="javascript:void(0)" style={{fontWeight:'bold'}}>SPF</a>
+						</li>
+						<li className="tab" onClick={this.choice.bind(this,4)}>
+							<a className={`${choice=='4'?'active':''}`} href="javascript:void(0)" style={{fontWeight:'bold'}}>HRRN</a>
+						</li>
+						<li className="tab" onClick={this.choice.bind(this,5)}>
+							<a className={`${choice=='5'?'active':''}`} href="javascript:void(0)" style={{fontWeight:'bold'}}>比较</a>
+						</li>
 					</ul>
 				</div>
 			</nav>
@@ -41,21 +72,35 @@ class BottomBar extends React.Component{
 		super(props);
 		this.state={
 			disabled:false,
+			initBtnDisabled:false,
 			resetDisplay:"hidden",
-			processes:null
+			startDisplay:"hidden",
 		}
 	}
 	createProcess=()=>{
 		var processes=util.init(10);
 		this.props.createProcess(processes);
 		this.setState({
-			disabled:true,
 			resetDisplay:"visible",
-			processes:processes
+			startDisplay:"visible",	
 		});
 	}
 	reset=()=>{
 		window.location.reload()
+	}
+	start=()=>{
+		this.setState({
+			disabled:true,
+			initBtnDisabled:true
+		})
+		this.props.start();
+	}
+	componentWillReceiveProps(newProps){
+		if(newProps.isDone){
+			this.setState({
+				disabled:false
+			})
+		}
 	}
 	render(){
 		const btnStyle={
@@ -71,6 +116,13 @@ class BottomBar extends React.Component{
 			color:'white',
 			visibility:this.state.resetDisplay
 		}
+		const startStyle={
+			'marginTop':'15px',
+			marginLeft:'15px',
+			backgroundColor:"#4CAF50",
+			color:'white',
+			visibility:this.state.startDisplay
+		}
 		return (
 			<div className='col s12 animated slideInUp'id='bottomBar' 
 				style={{
@@ -82,13 +134,10 @@ class BottomBar extends React.Component{
 					animationDuration:'0.5s',
 					padding:'0'
 					}}>
-				<div className={'col s6'}>
-					<div className={'btn waves-effect'} style={btnStyle} onClick={this.createProcess} disabled={this.state.disabled}>初始化数据</div>
-					{/* <div className={'btn waves-effect'} style={btnStyle} onClick={this.createProcess} disabled={this.state.disabled}>开始</div> */}
-					<div className={'btn waves-effect'} style={restBtnStyle} onClick={this.reset} >重置</div>
-				</div>
-				<div className={'col s6'}style={{height:'100%',padding:'0'}}>
-				
+				<div className={'col s12'}>
+					<Button style={btnStyle} variant="contained" onClick={this.createProcess} disabled={this.state.initBtnDisabled}>初始化数据</Button>
+					<Button style={startStyle} variant="contained" onClick={this.start} disabled={this.state.disabled}>开始</Button>
+					<Button style={restBtnStyle} variant="contained" onClick={this.reset} >重置</Button>
 				</div>
 			</div>
 		)
@@ -108,13 +157,6 @@ class Result extends React.Component{
 			this.props.getInstance(instance);
 		 });
 	}
-	// componentWillReceiveProps(newProps){
-	// 	if(newProps.isOpen){
-	// 		this.state.instance.open();
-	// 	}else {
-	// 		this.state.instance.close();
-	// 	}
-	// }
 	render(){
 		return(
 			<div className="col s2">
@@ -124,9 +166,10 @@ class Result extends React.Component{
 						<h4 style={{color:'#4CAF50'}}>完成!</h4>
 						<div style={{fontSize:'1.2rem',color:'#757575'}}>平均周转周期：<span id='avgRound'style={{fontWeight:'bold',fontSize:'1.4rem',color:'#4CAF50'}}></span></div>
 						<div style={{fontSize:'1.2rem',color:'#757575'}}>平均带权周转周期：<span id='weRound'style={{fontWeight:'bold',fontSize:'1.4rem',color:'#4CAF50'}}></span></div>
+						
 					</div>
 					<div className="modal-footer">
-						<a href="javascript:void(0)" className="modal-close waves-effect waves-green btn-flat">确定</a>
+						<a href="javascript:void(0)" className="modal-close right btn-flat" style={{backgroundColor:'#4CAF50',color:'white',marginLeft:'15px'}}>确定</a>
 					</div>
 				</div>
 			</div>
@@ -146,18 +189,24 @@ class Index extends React.Component{
 			choice:sessionStorage.getItem('choice'),
 			processes:[],
 			isReset:false,
-			instance:null
+			instance:null,
+			isStart:false,
+			isDone:false,
+			compareData:[]
 		}
 	}
 	createProcess=(processes)=>{
 		this.setState({
-			processes:processes
+			processes:processes,
+			isStart:false
 		})
 	}
 	choiceChange=(choice)=>{
 		sessionStorage.setItem('choice',choice);
 		this.setState({
-			choice:choice+''
+			choice:choice+'',
+			isStart:false,
+			isDone:true
 		})
 	}
 	getInstance=(instance)=>{
@@ -165,9 +214,30 @@ class Index extends React.Component{
 			instance:instance
 		}))
 	}
+	start=()=>{
+		this.setState({
+			isStart:true,
+			isDone:false
+		})
+	}
+	done=()=>{
+		this.setState({
+			isStart:false,
+			isDone:true
+		})
+	}
+	addCompareData=(data)=>{
+		let update=this.state.compareData;
+		update.push(data);
+		this.setState({
+			compareData:update
+		})
+	}
+
 	render(){
 		let choice=this.state.choice;
 		let info;
+		let dataList;
 		if(choice=='1'){
 			info=<div>
 				<h4>先来先服务FCFS</h4>
@@ -211,20 +281,70 @@ class Index extends React.Component{
 				<li>对于长作业，作业的响应比可以随等待时间的增加而提高，当其等待时间足够长时，其响应比便可升到很高，从而也可获得处理机。克服了饥饿状态，兼顾了长作业。</li>
 			</div>
 		}
+		else if(choice=='5'){
+			info=<div>
+				<h4>算法比较</h4>
+				<p>收集之前运行生成的平均周转时间和平均带权周转时间数据进行比较</p>
+			</div>
+		}
+		let avgRound=this.state.compareData.map((item)=>item.avgRound);
+		let weRound=this.state.compareData.map((item)=>item.weRound);
+		let labels=this.state.compareData.map((item)=>item.algoName);
+		const data={
+			chartID:'compareChart',
+			chartName:'条形图',
+			type:'bar',
+			avgRound:avgRound,
+			weRound:weRound,
+			labels:labels
+		}
 		return(
 			<div>
-				<Nav choiceChange={this.choiceChange}/>
-				<div className='row' id='content'style={{marginBottom:'80px'}}>
-					<Content choice={this.state.choice} processes={this.state.processes} instance={this.state.instance}/>
-					<BottomBar createProcess={this.createProcess}/>
+				<Nav choiceChange={this.choiceChange} isDone={this.state.isDone} isStart={this.state.isStart}/>
+				<div className='row' id='content'style={{marginBottom:'80px',backgroundColor:'#f5f5f5'}}>
+				{
+					this.state.choice!='5'&&
+					<Content choice={this.state.choice} processes={this.state.processes} instance={this.state.instance} isStart={this.state.isStart} done={this.done} addCompareData={this.addCompareData}/> 
+				}
+				{
+					this.state.choice=='5'&&
+					<div className='col s12'>
+						<Card className="col s6" style={{padding:'0'}}>
+						<Table >
+							<TableHead>
+							<TableRow>
+								<TableCell>算法名</TableCell>
+								<TableCell align="right">平均周转时间</TableCell>
+								<TableCell align="right">平均带权周转时间</TableCell>
+								<TableCell align="right">时间</TableCell>
+							</TableRow>
+							</TableHead>
+							<TableBody>
+							{this.state.compareData.map(row => (
+								<TableRow key={row.algoName}>
+									<TableCell component="th" scope="row">{row.algoName}</TableCell>
+									<TableCell align="right">{row.avgRound}</TableCell>
+									<TableCell align="right">{row.weRound}</TableCell>
+									<TableCell align="right">{row.time}</TableCell>
+								</TableRow>
+							))}
+							</TableBody>
+						</Table>
+						</Card>
+						<CompareChart data={data}/>
+					</div>
+					
+				}
+					
+					<BottomBar createProcess={this.createProcess} start={this.start} isDone={this.state.isDone}/>
 				</div>
 				<Result processes={this.state.processes} getInstance={this.getInstance}/>
-				<div id="modal2" class="modal">
-						<div class="modal-content">
+				<div id="modal2" className="modal">
+						<div className="modal-content">
 							{info}
 						</div>
-						<div class="modal-footer">
-							<a href="javascript:void(0)" class="modal-close waves-effect btn-flat" style={{backgroundColor:'#4CAF50',color:'white'}}>Agree</a>
+						<div className="modal-footer">
+							<a href="javascript:void(0)" className="modal-close waves-effect btn-flat" style={{backgroundColor:'#4CAF50',color:'white'}}>Agree</a>
 						</div>
 				</div>
 			</div>

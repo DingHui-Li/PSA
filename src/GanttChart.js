@@ -1,6 +1,6 @@
 import React from "react"
 import Chart from "chart.js"
-import {status} from "./App"
+import Card from '@material-ui/core/Card';
 
 export default class GanttChart extends React.Component{
 	constructor(props){
@@ -10,8 +10,16 @@ export default class GanttChart extends React.Component{
 	  }
 	}
 	componentWillReceiveProps(newProps){//直接修改chart中的数据
-		
 	  if(this.state.chart!=null){
+			const startData={
+				label:"startTime",
+				data:this.props.data.startData,
+				backgroundColor:'rgba(69,90,100, 0)',
+			}
+			if(newProps.isStart){//如果重新开始
+				this.state.chart.data.datasets=[];//清空数据
+				this.state.chart.data.datasets.push(startData);//添加初始数据
+			}
 				this.state.chart.options.legend.display=false;
 				if(newProps.data.isLegend=='false'){
 					this.state.chart.options.legend.display=false;
@@ -20,14 +28,14 @@ export default class GanttChart extends React.Component{
 					this.state.chart.options.legend.display=true;
 				}
 
-				if(newProps.data.startData!=null){
+				if(newProps.data.startData.length!=0){
 					this.state.chart.data.datasets[0].data=newProps.data.startData.time;
 					if(newProps.data.startData.labels!=undefined){
 						this.state.chart.data.labels=newProps.data.startData.labels;
 					}
 				}
 				
-				if(newProps.data.serverData!=null){
+				if(newProps.data.serverData.length!=0){
 					let newData=[];
 					let newData2=[];
 					let labels=this.state.chart.data.labels;
@@ -81,13 +89,7 @@ export default class GanttChart extends React.Component{
 	  };
 	  var data={
 		labels :[],
-		datasets:[
-			{
-				label:"startTime",
-				data:this.props.data.startData,
-				backgroundColor:'rgba(69,90,100, 0)',
-			}
-		]
+		datasets:[]
 	  }
 	  var ctx = document.getElementById(this.props.data.chartID);
 	  var myBarChart = new Chart(ctx, {
@@ -106,7 +108,9 @@ export default class GanttChart extends React.Component{
 	  }
 	  return(
 		<div className={'col l6 s12'} >
-		  <canvas className={'z-depth-1'}style={style}height='200' id={this.props.data.chartID}></canvas>
+			<Card style={style}>
+		  	<canvas height='200' id={this.props.data.chartID}></canvas>
+			</Card>
 		</div>
 	  );
 	}
