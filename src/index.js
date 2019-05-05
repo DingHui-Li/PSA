@@ -39,7 +39,7 @@ class Nav extends React.Component{
 		return(
 			<nav id='nav'className="nav-extended animated slideInDown"style={{backgroundColor:'#2196F3','animationDuration':'0.8s',position: 'fixed'}}>
 				<div className="nav-wrapper">
-					<a href="" className="brand-logo hide-on-small-only">进程调度算法</a>
+					<a href="" className="brand-logo hide-on-med-and-down">进程调度算法</a>
 					<a href="#modal2" className="brand-logo center modal-trigger" style={{whiteSpace:'nowrap',textOverflow:'ellipsis',fontSize:'1.5rem'}}>
 						{algoName}<img src="./about.png" style={{height:'20px'}}/>
 					</a>
