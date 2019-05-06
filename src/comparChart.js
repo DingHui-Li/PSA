@@ -56,7 +56,7 @@ export default class CompareChart extends React.Component{
 			marginTop:'10px'
 	  }
 	  return(
-		<div className={'col l6 s12'} >
+		<div className={'col l6 s12'}>
 			<Card style={style}>
 		  	<canvas height='200' id={this.props.data.chartID}></canvas>
 			</Card>

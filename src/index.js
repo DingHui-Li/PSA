@@ -195,6 +195,9 @@ class Index extends React.Component{
 			compareData:[]
 		}
 	}
+	componentDidMount(){
+		document.getElementById('loading').style.display='none';
+	}
 	createProcess=(processes)=>{
 		this.setState({
 			processes:processes,
@@ -309,7 +312,7 @@ class Index extends React.Component{
 				{
 					this.state.choice=='5'&&
 					<div className='col s12'>
-						<Card className="col s6" style={{padding:'0'}}>
+						<Card className="col s12 l6" style={{padding:'0'}}>
 						<Table >
 							<TableHead>
 							<TableRow>
